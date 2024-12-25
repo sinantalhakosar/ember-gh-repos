@@ -10,6 +10,7 @@ export default class RepositorySerializer extends RESTSerializer {
         html_url: repo.html_url,
         language: repo.language,
         private: repo.private,
+        description: repo.description,
       },
     }));
 
