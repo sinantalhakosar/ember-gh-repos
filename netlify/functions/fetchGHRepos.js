@@ -20,6 +20,8 @@ const handler = async (event) => {
     'organization',
   );
 
+  const type = new URLSearchParams(queryStringParameters).get('type') || 'all';
+
   if (!organization) {
     return {
       statusCode: 400,
@@ -29,7 +31,17 @@ const handler = async (event) => {
     };
   }
 
-  const url = `https://api.github.com/orgs/${organization}/repos`;
+  if (type !== 'all' && type !== 'public' && type !== 'private') {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error:
+          'Type query parameter must be one of: all, public, private or missing',
+      }),
+    };
+  }
+
+  const url = `https://api.github.com/orgs/${organization}/repos?type=${type}`;
 
   try {
     const response = await fetch(url, {

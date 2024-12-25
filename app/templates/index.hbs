@@ -1,16 +1,29 @@
 {{page-title "EmberGhRepos"}}
-<div class="max-w-screen-lg mx-auto">
-  <RepoFilter @organization={{this.model.organization}} />
+<div class="max-w-screen-lg mx-auto h-screen">
+  {{#if (eq this.model.data null)}}
+    <div class="h-full flex items-center justify-center">
+      <RepoFilter @organization={{this.model.organization}} />
+    </div>
+  {{else if (eq this.model.data undefined)}}
+    <div class="h-full flex items-center justify-center">
+      <h1>Error</h1>
+    </div>
 
-  {{#each this.model.data as |repo|}}
-    <RepoCard
-      @repo_name={{repo.name}}
-      @repo_url={{repo.html_url}}
-      @is_private={{repo.private}}
-      @description={{repo.description}}
-      @language={{repo.language}}
-      @owner={{repo.owner}}
-    />
-  {{/each}}
+  {{else}}
+    <div class="flex flex-col gap-4 mt-10">
+      <RepoFilter @organization={{this.model.organization}} />
+
+      {{#each this.model.data as |repo|}}
+        <RepoCard
+          @repo_name={{repo.name}}
+          @repo_url={{repo.html_url}}
+          @is_private={{repo.private}}
+          @description={{repo.description}}
+          @language={{repo.language}}
+          @owner={{repo.owner}}
+        />
+      {{/each}}
+    </div>
+  {{/if}}
 
 </div>

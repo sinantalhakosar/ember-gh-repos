@@ -6,6 +6,7 @@ import { inject as service } from '@ember/service';
 export default class RepoFilterIndex extends Component {
   @service router;
   @tracked organization = '';
+  @tracked type = 'all';
 
   constructor() {
     super(...arguments);
@@ -20,14 +21,35 @@ export default class RepoFilterIndex extends Component {
   @action
   handleKeyDown(event) {
     if (event.key === 'Enter') {
-      this.search();
+      this.handleSearch();
     }
   }
 
   @action
-  search() {
-    this.router.transitionTo({
-      queryParams: { organization: this.organization },
-    });
+  handleSearch() {
+    let queryParams = {
+      ...this.router.currentRoute.queryParams,
+      organization: this.organization,
+    };
+    this.router.transitionTo({ queryParams });
+  }
+
+  @action
+  handleTypeChange(checkboxType) {
+    if (this.type === 'all') {
+      this.type = checkboxType === 'private' ? 'public' : 'private';
+    } else if (this.type === 'private') {
+      this.type = checkboxType === 'private' ? undefined : 'all';
+    } else if (this.type === 'public') {
+      this.type = checkboxType === 'private' ? 'all' : undefined;
+    } else {
+      this.type = checkboxType;
+    }
+
+    let queryParams = {
+      ...this.router.currentRoute.queryParams,
+      type: this.type,
+    };
+    this.router.transitionTo({ queryParams });
   }
 }

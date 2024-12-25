@@ -17,7 +17,7 @@ module('Unit | Service | github', function (hooks) {
       assert.strictEqual(modelName, 'repository', 'correct model name is used');
       assert.deepEqual(
         query,
-        { organization: 'test-org' },
+        { organization: 'test-org', type: undefined },
         'correct query parameters are passed',
       );
       return Promise.resolve([]);

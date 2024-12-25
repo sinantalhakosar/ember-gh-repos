@@ -6,17 +6,35 @@ export default class IndexRoute extends Route {
 
   queryParams = {
     organization: { refreshModel: true },
+    type: { refreshModel: true },
   };
 
   async model(params) {
     if (!params.organization) {
-      throw new Error('Organization query parameter is required');
+      return {
+        organization: '',
+        type: 'all',
+        data: null,
+      };
     }
 
-    const data = await this.github.fetchNetlify(params.organization);
-    return {
-      organization: params.organization,
-      data,
-    };
+    try {
+      const data = await this.github.fetchNetlify(
+        params.organization,
+        params.type,
+      );
+
+      return {
+        organization: params.organization,
+        type: params.type || 'all',
+        data,
+      };
+    } catch (error) {
+      return {
+        organization: params.organization,
+        type: 'all',
+        data: undefined,
+      };
+    }
   }
 }

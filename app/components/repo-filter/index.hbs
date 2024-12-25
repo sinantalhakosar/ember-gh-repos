@@ -1,4 +1,4 @@
-<div>
+<div class="w-full">
   <div class="flex flex-col justify-center">
     <label
       for="organization"
@@ -10,7 +10,7 @@
         type="text"
         id="organization"
         class="bg-transparent border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"
-        placeholder="octokit"
+        placeholder="Enter organization name"
         required
         value={{this.organization}}
         {{on "input" this.handleOrganizationChange}}
@@ -19,38 +19,42 @@
       <button
         type="button"
         class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
-        {{on "click" this.search}}
+        {{on "click" this.handleSearch}}
       >Search</button>
     </div>
   </div>
 
-  <div class="flex items-center gap-2 mt-4 w-full">
-    <div class="flex items-center">
-      <input
-        checked
-        id="public-checkbox"
-        type="checkbox"
-        value=""
-        class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2"
-      />
-      <label
-        for="default-checkbox"
-        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-      >Public Repos</label>
-    </div>
-    <div class="flex items-center">
-      <input
-        checked
-        id="private-checkbox"
-        type="checkbox"
-        value=""
-        class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2"
-      />
-      <label
-        for="checked-checkbox"
-        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-      >Private Repos</label>
-    </div>
+  {{#unless (eq @organization "")}}
+    <div class="flex items-center gap-2 mt-4 w-full">
+      <div class="flex items-center">
+        <input
+          checked={{or (eq this.type "public") (eq this.type "all")}}
+          id="public-checkbox"
+          type="checkbox"
+          value=""
+          class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2"
+          {{on "click" (fn this.handleTypeChange "public")}}
+        />
+        <label
+          for="default-checkbox"
+          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+        >Public Repos</label>
+      </div>
+      <div class="flex items-center">
+        <input
+          checked={{or (eq this.type "private") (eq this.type "all")}}
+          id="private-checkbox"
+          type="checkbox"
+          value=""
+          class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2"
+          {{on "click" (fn this.handleTypeChange "private")}}
+        />
+        <label
+          for="checked-checkbox"
+          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+        >Private Repos</label>
+      </div>
 
-  </div>
+    </div>
+  {{/unless}}
 </div>

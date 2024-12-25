@@ -9,19 +9,15 @@ module('Unit | Route | index', function (hooks) {
     assert.ok(route);
   });
 
-  test('model hook requires organization parameter', async function (assert) {
+  test('model hook returns data = null if organization parameter empty', async function (assert) {
     const route = this.owner.lookup('route:index');
 
-    try {
-      await route.model({});
-      assert.notOk(true, 'should have thrown an error');
-    } catch (error) {
-      assert.strictEqual(
-        error.message,
-        'Organization query parameter is required',
-        'throws correct error message',
-      );
-    }
+    const model = await route.model({});
+    assert.deepEqual(
+      model,
+      { organization: '', data: null, type: 'all' },
+      'returns default model when organization parameter is missing',
+    );
   });
 
   test('model hook fetches repositories for organization', async function (assert) {
@@ -54,15 +50,11 @@ module('Unit | Route | index', function (hooks) {
       return Promise.reject(new Error('Service Error'));
     };
 
-    try {
-      await route.model({ organization: 'test-org' });
-      assert.notOk(true, 'should have thrown an error');
-    } catch (error) {
-      assert.strictEqual(
-        error.message,
-        'Service Error',
-        'error is propagated correctly',
-      );
-    }
+    const model = await route.model({ organization: 'test-org' });
+    assert.deepEqual(
+      model,
+      { organization: 'test-org', type: 'all', data: undefined },
+      'returns model with data as undefined when service errors',
+    );
   });
 });

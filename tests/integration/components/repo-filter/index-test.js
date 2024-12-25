@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { setupRenderingTest } from 'ember-gh-repos/tests/helpers';
+import { setupRenderingTest } from 'ember-qunit';
 import { hbs } from 'ember-cli-htmlbars';
 import { render, fillIn, triggerKeyEvent, click } from '@ember/test-helpers';
 import Service from '@ember/service';
@@ -11,6 +11,8 @@ module('Integration | Component | repo-filter/index', function (hooks) {
     this.owner.register(
       'service:router',
       class MockRouterService extends Service {
+        currentRoute = { queryParams: {} };
+        queryParams = {};
         transitionTo() {}
       },
     );
