@@ -31,7 +31,7 @@ const handler = async (event) => {
     };
   }
 
-  const url = `https://api.github.com/repos/${owner}/${repository}/branches?per_page=1`;
+  const url = `https://api.github.com/repos/${owner}/${repository}/branches`;
 
   try {
     const response = await fetch(url, {
@@ -51,27 +51,9 @@ const handler = async (event) => {
     }
 
     const data = await response.json();
-    if (data.length === 0) {
-      // means repo is empty
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data: 0 }),
-      };
-    }
-
-    const linkHeader = response.headers.get('link');
-    let branchCount = 1; // main branch is always there
-
-    if (linkHeader) {
-      const matches = linkHeader.match(/page=(\d+)>; rel="last"/);
-      if (matches && matches[1]) {
-        branchCount = parseInt(matches[1], 10);
-      }
-    }
-
     return {
       statusCode: 200,
-      body: JSON.stringify({ data: branchCount }),
+      body: JSON.stringify(data),
     };
   } catch (error) {
     console.error('Error fetching branches:', error);

@@ -29,23 +29,25 @@
       </div>
 
       <div class="flex items-center">
-        {{#if @language}}
-          <span
-            class="w-2 h-2 rounded-full mr-2"
-            style={{language-color @language}}
-          ></span>
 
-          <span class="text-xs">
-            {{@language}}
-          </span>
+        <span
+          class="w-2 h-2 rounded-full mr-2"
+          style={{language-color @language}}
+        ></span>
 
-        {{/if}}
+        <span class="text-xs">
+          {{if @language @language "Unknown"}}
+        </span>
 
         <div class="flex items-center gap-1 ml-4">
-          {{svg-jar "split" class="w-4 h-4"}}
-          <span class="text-sm">
-            {{this.branchCount}}
-          </span>
+          {{#if this.isBranchCountLoading}}
+            <div class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-6"></div>
+          {{else}}
+            {{svg-jar "split" class="w-4 h-4"}}
+            <span class="text-sm">
+              {{this.branchCount}}
+            </span>
+          {{/if}}
         </div>
 
       </div>
@@ -62,7 +64,28 @@
 
   {{#unless this.collapse}}
     <div class="mt-4 pt-4 border-t border-gray-700">
-      <span class="text-sm font-medium mb-2">Branches</span>
+      {{#if this.isBranchesLoading}}
+        Loading...
+      {{else if (eq this.branches.length 0)}}
+        No branches available. Repository might be empty.
+      {{else}}
+        List of branches:
+        <ul class="list-disc list-inside">
+          {{#each this.branches as |branch|}}
+            <li class="text-sm text-gray-400">
+              <a
+                href="{{@repo_url}}/tree/{{branch}}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sky-500 hover:underline"
+              >
+                {{branch}}
+              </a>
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
+
     </div>
   {{/unless}}
 </div>

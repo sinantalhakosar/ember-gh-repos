@@ -29,6 +29,18 @@ export default class ApplicationSerializer extends RESTSerializer {
           },
         },
       };
+    } else if (primaryModelClass.modelName === 'branch') {
+      const normalizedPayload = payload.map((branch) => ({
+        id: String(branch.name),
+        type: 'branch',
+        attributes: {
+          name: branch.name,
+        },
+      }));
+
+      return {
+        data: normalizedPayload,
+      };
     } else {
       return super.normalizeResponse(...arguments);
     }
