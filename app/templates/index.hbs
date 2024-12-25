@@ -1,0 +1,21 @@
+{{page-title "EmberGhRepos"}}
+<table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>GitHub Link</th>
+        <th>Language</th>
+        <th>Visibility</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each this.model as |repo|}}
+        <tr>
+          <td>{{repo.name}}</td>
+          <td><a href={{repo.html_url}} target="_blank" rel="noopener noreferrer">{{repo.html_url}}</a></td>
+          <td>{{repo.language}}</td>
+          <td>{{if repo.private "Private" "Public"}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
