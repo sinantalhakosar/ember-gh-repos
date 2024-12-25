@@ -40,7 +40,7 @@ module('Unit | Route | index', function (hooks) {
     const model = await route.model({ organization: 'test-org' });
     assert.ok(model, 'model is returned');
     assert.strictEqual(
-      model[0].name,
+      model.data[0].name,
       'test-repo',
       'model contains correct data',
     );

@@ -13,6 +13,10 @@ export default class IndexRoute extends Route {
       throw new Error('Organization query parameter is required');
     }
 
-    return this.github.fetchNetlify(params.organization);
+    const data = await this.github.fetchNetlify(params.organization);
+    return {
+      organization: params.organization,
+      data,
+    };
   }
 }

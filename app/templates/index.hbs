@@ -1,6 +1,8 @@
 {{page-title "EmberGhRepos"}}
 <div class="max-w-screen-lg mx-auto">
-  {{#each this.model as |repo|}}
+  <RepoFilter @organization={{this.model.organization}} />
+
+  {{#each this.model.data as |repo|}}
     <RepoCard
       @repo_name={{repo.name}}
       @repo_url={{repo.html_url}}
@@ -10,4 +12,5 @@
       @owner={{repo.owner}}
     />
   {{/each}}
+
 </div>
