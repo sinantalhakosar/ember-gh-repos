@@ -1,5 +1,5 @@
 const handler = async (event) => {
-  const { httpMethod, queryStringParameters } = event;
+  const { httpMethod, queryStringParameters, headers } = event;
 
   if (httpMethod !== 'GET') {
     return {
@@ -7,11 +7,15 @@ const handler = async (event) => {
       body: JSON.stringify({ error: 'Method Not Allowed' }),
     };
   }
+  const githubToken = headers.cookie
+    .split(';')
+    .find((cookie) => cookie.trim().startsWith('github_token='))
+    ?.split('=')[1];
 
-  const githubApiKey = process.env.GITHUB_API_KEY;
+  const githubApiKey = process.env.GITHUB_API_KEY || githubToken;
   if (!githubApiKey) {
     return {
-      statusCode: 500,
+      statusCode: 401,
       body: JSON.stringify({ error: 'GitHub API key is missing' }),
     };
   }

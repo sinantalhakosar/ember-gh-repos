@@ -15,7 +15,7 @@ module('Unit | Route | index', function (hooks) {
     const model = await route.model({});
     assert.deepEqual(
       model,
-      { organization: '', data: null, type: 'all' },
+      { organization: '', data: null },
       'returns default model when organization parameter is missing',
     );
   });
@@ -30,7 +30,7 @@ module('Unit | Route | index', function (hooks) {
         'test-org',
         'fetchNetlify called with correct organization',
       );
-      return Promise.resolve([{ name: 'test-repo' }]);
+      return Promise.resolve({ data: [{ name: 'test-repo' }] });
     };
 
     const model = await route.model({ organization: 'test-org' });
@@ -53,8 +53,12 @@ module('Unit | Route | index', function (hooks) {
     const model = await route.model({ organization: 'test-org' });
     assert.deepEqual(
       model,
-      { organization: 'test-org', type: 'all', data: undefined },
-      'returns model with data as undefined when service errors',
+      {
+        organization: 'test-org',
+        data: undefined,
+        error: Error('Service Error'),
+      },
+      'returns model with data as undefined and includes service error when service errors',
     );
   });
 });

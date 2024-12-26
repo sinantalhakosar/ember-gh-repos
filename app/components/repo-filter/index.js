@@ -1,12 +1,14 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
-import { inject as service } from '@ember/service';
 
 export default class RepoFilterIndex extends Component {
-  @service router;
   @tracked organization = '';
-  @tracked type = 'all';
+  @tracked githubToken =
+    document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('github_token='))
+      ?.split('=')[1] || '';
 
   constructor() {
     super(...arguments);
@@ -15,7 +17,8 @@ export default class RepoFilterIndex extends Component {
 
   @action
   handleTokenChange(event) {
-    document.cookie = `github_token=${event.target.value}; path=/; secure; HttpOnly`;
+    document.cookie = `github_token=${event.target.value}; path=/;`;
+    this.githubToken = event.target.value;
   }
 
   @action
@@ -33,29 +36,26 @@ export default class RepoFilterIndex extends Component {
   @action
   handleSearch() {
     let queryParams = {
-      ...this.router.currentRoute.queryParams,
       organization: this.organization,
     };
-    this.router.transitionTo({ queryParams });
+
+    this.args.onSearch(queryParams);
   }
 
   @action
   handleTypeChange(checkboxType) {
-    if (this.type === 'all') {
-      this.type = checkboxType === 'private' ? 'public' : 'private';
-    } else if (this.type === 'private') {
-      this.type = checkboxType === 'private' ? undefined : 'all';
-    } else if (this.type === 'public') {
-      this.type = checkboxType === 'private' ? 'all' : undefined;
+    let newType = '';
+    if (this.args.selectedType === 'all') {
+      newType = checkboxType === 'private' ? 'public' : 'private';
+    } else if (this.args.selectedType === 'private') {
+      newType = checkboxType === 'private' ? undefined : 'all';
+    } else if (this.args.selectedType === 'public') {
+      newType = checkboxType === 'private' ? 'all' : undefined;
     } else {
-      this.type = checkboxType;
+      newType = checkboxType;
     }
 
-    let queryParams = {
-      ...this.router.currentRoute.queryParams,
-      type: this.type,
-    };
-    this.router.transitionTo({ queryParams });
+    this.args.onTypeChange(newType);
   }
 
   @action

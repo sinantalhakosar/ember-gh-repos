@@ -6,14 +6,12 @@ export default class IndexRoute extends Route {
 
   queryParams = {
     organization: { refreshModel: true },
-    type: { refreshModel: true },
   };
 
   async model(params) {
     if (!params.organization) {
       return {
         organization: '',
-        type: 'all',
         data: null,
       };
     }
@@ -29,26 +27,29 @@ export default class IndexRoute extends Route {
           (error) => error.status === '429',
         );
 
+        const apiKeyMissing = error.errors.some(
+          (error) => error.status === '401',
+        );
+
         return {
           organization: params.organization,
-          type: 'all',
           data,
           error: rateLimitExceeded
             ? 'rate_limit_exceeded'
-            : 'failed_to_fetch_repositories',
+            : apiKeyMissing
+              ? 'api_key_missing'
+              : 'failed_to_fetch_repositories',
         };
       }
 
       return {
         organization: params.organization,
-        type: params.type || 'all',
         data,
         error,
       };
     } catch (error) {
       return {
         organization: params.organization,
-        type: 'all',
         data: undefined,
         error,
       };

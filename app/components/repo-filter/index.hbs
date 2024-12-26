@@ -10,9 +10,8 @@
         class="bg-transparent border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"
         placeholder="Enter your GitHub API token"
         required
-        value=""
-        {{on "input" this.handleOrganizationChange}}
-        {{on "keydown" this.handleKeyDown}}
+        value={{this.githubToken}}
+        {{on "input" this.handleTokenChange}}
       />
     </div>
     <span class="text-xs mt-1">For more information visit
@@ -56,7 +55,7 @@
     <div class="flex items-center gap-2 mt-4 w-full">
       <div class="flex items-center">
         <input
-          checked={{or (eq this.type "public") (eq this.type "all")}}
+          checked={{or (eq @selectedType "public") (eq @selectedType "all")}}
           id="public-checkbox"
           type="checkbox"
           value=""
@@ -70,7 +69,7 @@
       </div>
       <div class="flex items-center">
         <input
-          checked={{or (eq this.type "private") (eq this.type "all")}}
+          checked={{or (eq @selectedType "private") (eq @selectedType "all")}}
           id="private-checkbox"
           type="checkbox"
           value=""

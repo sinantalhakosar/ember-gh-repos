@@ -10,15 +10,7 @@ function parseLinkHeader(linkHeader) {
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const fetchAllPages = async (url) => {
-  const githubApiKey = process.env.GITHUB_API_KEY;
-  if (!githubApiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'GitHub API key is missing' }),
-    };
-  }
-
+const fetchAllPages = async (url, githubApiKey) => {
   let allData = [];
   let nextUrl = url;
   let remainingRateLimit = 5000;
@@ -33,10 +25,9 @@ const fetchAllPages = async (url) => {
 
     if (!response.ok) {
       return {
+        allData: [],
+        remainingRateLimit: null,
         statusCode: response.status,
-        body: JSON.stringify({
-          error: `Failed to fetch repositories: ${response.statusText}`,
-        }),
       };
     }
 
@@ -49,7 +40,11 @@ const fetchAllPages = async (url) => {
     allData = allData.concat(data);
 
     if (remainingRateLimit <= 1) {
-      break;
+      return {
+        allData: [],
+        remainingRateLimit: 0,
+        statusCode: response.status,
+      };
     }
 
     const links = parseLinkHeader(response.headers.get('Link'));
@@ -58,11 +53,11 @@ const fetchAllPages = async (url) => {
     if (nextUrl) await delay(100);
   }
 
-  return { allData, remainingRateLimit };
+  return { allData, remainingRateLimit, statusCode: 200 };
 };
 
 const handler = async (event) => {
-  const { httpMethod, queryStringParameters } = event;
+  const { httpMethod, queryStringParameters, headers } = event;
 
   if (httpMethod !== 'GET') {
     return {
@@ -71,11 +66,22 @@ const handler = async (event) => {
     };
   }
 
+  const githubToken = headers.cookie
+    .split(';')
+    .find((cookie) => cookie.trim().startsWith('github_token='))
+    ?.split('=')[1];
+
+  const githubApiKey = process.env.GITHUB_API_KEY || githubToken;
+  if (!githubApiKey) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'GitHub API key is missing' }),
+    };
+  }
+
   const organization = new URLSearchParams(queryStringParameters).get(
     'organization',
   );
-
-  const type = new URLSearchParams(queryStringParameters).get('type') || 'all';
 
   if (!organization) {
     return {
@@ -86,22 +92,28 @@ const handler = async (event) => {
     };
   }
 
-  if (type !== 'all' && type !== 'public' && type !== 'private') {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        error:
-          'Type query parameter must be one of: all, public, private or missing',
-      }),
-    };
-  }
-
-  const url = `https://api.github.com/orgs/${organization}/repos?type=${type}&per_page=100`;
+  const url = `https://api.github.com/orgs/${organization}/repos?per_page=100`;
 
   try {
-    const { allData: data, remainingRateLimit } = await fetchAllPages(url);
+    const {
+      allData: data,
+      remainingRateLimit,
+      statusCode,
+    } = await fetchAllPages(url, githubApiKey);
 
-    if (remainingRateLimit <= 1) {
+    if (statusCode === 401) {
+      return {
+        statusCode,
+        body: JSON.stringify({
+          error: 'Failed to fetch repositories',
+        }),
+      };
+    }
+
+    if (
+      (remainingRateLimit !== null && remainingRateLimit <= 1) ||
+      statusCode === 429
+    ) {
       return {
         statusCode: 429,
         body: JSON.stringify({

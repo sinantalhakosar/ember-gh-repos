@@ -2,21 +2,9 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { hbs } from 'ember-cli-htmlbars';
 import { render, fillIn, triggerKeyEvent, click } from '@ember/test-helpers';
-import Service from '@ember/service';
 
 module('Integration | Component | repo-filter/index', function (hooks) {
   setupRenderingTest(hooks);
-
-  hooks.beforeEach(function () {
-    this.owner.register(
-      'service:router',
-      class MockRouterService extends Service {
-        currentRoute = { queryParams: {} };
-        queryParams = {};
-        transitionTo() {}
-      },
-    );
-  });
 
   test('it renders and updates organization on input', async function (assert) {
     await render(hbs`<RepoFilter @organization="octokit" />`);
@@ -32,7 +20,9 @@ module('Integration | Component | repo-filter/index', function (hooks) {
       assert.ok(true, 'search action was called');
     });
 
-    await render(hbs`<RepoFilter @organization="octokit" />`);
+    await render(
+      hbs`<RepoFilter @organization="octokit" @onSearch={{this.search}} />`,
+    );
 
     await fillIn('input#organization', 'emberjs');
     await triggerKeyEvent('input#organization', 'keydown', 'Enter');
@@ -44,7 +34,9 @@ module('Integration | Component | repo-filter/index', function (hooks) {
       assert.ok(true, 'search action was called');
     });
 
-    await render(hbs`<RepoFilter @organization="octokit" />`);
+    await render(
+      hbs`<RepoFilter @organization="octokit" @onSearch={{this.search}} />`,
+    );
 
     await fillIn('input#organization', 'emberjs');
     await click('button');

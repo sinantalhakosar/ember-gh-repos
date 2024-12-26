@@ -17,7 +17,7 @@ module('Unit | Service | github', function (hooks) {
       assert.strictEqual(modelName, 'repository', 'correct model name is used');
       assert.deepEqual(
         query,
-        { organization: 'test-org', type: undefined },
+        { organization: 'test-org' },
         'correct query parameters are passed',
       );
       return Promise.resolve([]);
@@ -34,15 +34,11 @@ module('Unit | Service | github', function (hooks) {
       return Promise.reject(new Error('API Error'));
     };
 
-    try {
-      await service.fetchNetlify('test-org');
-      assert.notOk(true, 'should have thrown an error');
-    } catch (error) {
-      assert.strictEqual(
-        error.message,
-        'API Error',
-        'error is propagated correctly',
-      );
-    }
+    const result = await service.fetchNetlify('test-org');
+    assert.strictEqual(
+      result.error.message,
+      'API Error',
+      'error is propagated correctly',
+    );
   });
 });

@@ -1,6 +1,11 @@
 {{page-title "EmberGhRepos"}}
 <div class="max-w-screen-lg mx-auto h-screen">
-  {{#if (eq this.model.error "rate_limit_exceeded")}}
+  {{#if
+    (or
+      (eq this.model.error "rate_limit_exceeded")
+      (eq this.model.error "api_key_missing")
+    )
+  }}
     <div
       id="sticky-banner"
       tabindex="-1"
@@ -8,27 +13,59 @@
     >
       <div class="flex items-center mx-auto">
         <p class="flex items-center text-sm font-normal text-white">
-          <span
-            class="inline-flex p-1 me-3 bg-white rounded-full w-6 h-6 items-center justify-center flex-shrink-0 text-orange-500"
-          >
-            {{svg-jar "traffic-cone" class="w-4 h-4"}}
-          </span>
-          <span>Rate limit exceeded. Please try again later. For more
-            information you can visit
-            <a
-              href="https://docs.github.com/en/rest/rate-limit/rate-limit?apiVersion=2022-11-28"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline font-medium underline text-blue-800 underline-offset-2 decoration-600 decoration-solid hover:no-underline"
-            >Github Docs</a></span>
+          {{#if (eq this.model.error "rate_limit_exceeded")}}
+            <span
+              class="inline-flex p-1 me-3 bg-white rounded-full w-6 h-6 items-center justify-center flex-shrink-0 text-orange-500"
+            >
+              {{svg-jar "traffic-cone" class="w-4 h-4"}}
+            </span>
+            <span>Rate limit exceeded. Please try again later. For more
+              information you can visit
+              <a
+                href="https://docs.github.com/en/rest/rate-limit/rate-limit?apiVersion=2022-11-28"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline font-medium underline text-blue-800 underline-offset-2 decoration-600 decoration-solid hover:no-underline"
+              >Github Docs</a></span>
+          {{else}}
+            <span
+              class="inline-flex p-1 me-3 bg-white rounded-full w-6 h-6 items-center justify-center flex-shrink-0 text-black"
+            >
+              {{svg-jar "key" class="w-4 h-4"}}
+            </span>
+            <span>Please provide a Github API token. For more information you
+              can visit
+              <a
+                href="https://github.com/settings/tokens"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline font-medium underline text-blue-800 underline-offset-2 decoration-600 decoration-solid hover:no-underline"
+              >Developer Settings</a></span>
+          {{/if}}
+
         </p>
       </div>
     </div>
   {{/if}}
 
+  <div
+    class="{{if
+        (or
+          (eq this.model.error 'rate_limit_exceeded')
+          (eq this.model.error 'api_key_missing')
+        )
+        'pt-16'
+        'pt-5'
+      }}"
+  >
+    <h1 class="text-3xl">GitHub Repository Explorer</h1>
+    <p class="text-gray-300">View repositories and their details from any GitHub
+      organization</p>
+  </div>
+
   {{#if (eq this.modelData null)}}
-    <div class="h-full flex items-center justify-center">
-      <RepoFilter @organization={{this.model.organization}} @languages="{[]}" />
+    <div class="pt-10">
+      <RepoFilter @organization={{this.model.organization}} @languages={{array}} @onSearch={{this.handleSearch}}/>
     </div>
   {{else if (eq this.modelData undefined)}}
     <div class="h-full flex items-center justify-center">
@@ -40,22 +77,34 @@
         @organization={{this.model.organization}}
         @languages={{this.languages}}
         @onLanguageChange={{this.handleLanguageChange}}
+        @selectedType={{this.type}}
+        @onTypeChange={{this.handleTypeChange}}
+        @onSearch={{this.handleSearch}}
       />
 
       <span class="text-sm">Showing {{this.modelData.length}} repos total</span>
 
-      <div class="h-[calc(100vh-11rem)] overflow-y-auto">
-        {{#each this.modelData as |repo|}}
-          <RepoCard
-            @repo_name={{repo.name}}
-            @repo_url={{repo.html_url}}
-            @is_private={{repo.private}}
-            @description={{repo.description}}
-            @language={{repo.language}}
-            @owner={{repo.owner}}
-          />
-        {{/each}}
-      </div>
+      {{#if (eq this.modelData.length 0)}}
+        <div class="flex flex-col items-center justify-center gap-2 border border-gray-700 rounded-md p-4">
+          {{svg-jar "rabbit" class="w-40 h-40 text-blue-100"}}
+          <span class="text-lg">Its a bit empty here</span>
+          <span class="text-sm">No repository exist for this organization</span>
+        </div>
+      {{else}}
+        <div class="h-[calc(100vh-25rem)] overflow-y-auto">
+          {{#each this.modelData as |repo|}}
+            <RepoCard
+              @repo_name={{repo.name}}
+              @repo_url={{repo.html_url}}
+              @is_private={{repo.private}}
+              @description={{repo.description}}
+              @language={{repo.language}}
+              @owner={{repo.owner}}
+            />
+          {{/each}}
+        </div>
+      {{/if}}
+
     </div>
   {{/if}}
 </div>
