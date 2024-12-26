@@ -9,6 +9,7 @@ export default class RepoFilterIndex extends Component {
       .split('; ')
       .find((row) => row.startsWith('github_token='))
       ?.split('=')[1] || '';
+  @tracked disableSearch = false;
 
   constructor() {
     super(...arguments);
@@ -34,6 +35,13 @@ export default class RepoFilterIndex extends Component {
 
   @action
   handleSearch() {
+    if (!this.githubToken || !this.organization) {
+      this.disableSearch = true;
+      return;
+    }
+
+    this.disableSearch = false;
+
     let queryParams = {
       organization: this.organization,
     };
