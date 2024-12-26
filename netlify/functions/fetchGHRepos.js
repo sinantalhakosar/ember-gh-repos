@@ -1,3 +1,66 @@
+function parseLinkHeader(linkHeader) {
+  if (!linkHeader) return {};
+
+  return linkHeader.split(',').reduce((acc, link) => {
+    const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/);
+    if (match) acc[match[2]] = match[1];
+    return acc;
+  }, {});
+}
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const fetchAllPages = async (url) => {
+  const githubApiKey = process.env.GITHUB_API_KEY;
+  if (!githubApiKey) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'GitHub API key is missing' }),
+    };
+  }
+
+  let allData = [];
+  let nextUrl = url;
+  let remainingRateLimit = 5000;
+
+  while (nextUrl) {
+    const response = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Bearer ${githubApiKey}`,
+        Accept: 'application/vnd.github+json',
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({
+          error: `Failed to fetch repositories: ${response.statusText}`,
+        }),
+      };
+    }
+
+    remainingRateLimit = parseInt(
+      response.headers.get('x-ratelimit-remaining'),
+      10,
+    );
+
+    const data = await response.json();
+    allData = allData.concat(data);
+
+    if (remainingRateLimit <= 1) {
+      break;
+    }
+
+    const links = parseLinkHeader(response.headers.get('Link'));
+    nextUrl = links.next;
+
+    if (nextUrl) await delay(100);
+  }
+
+  return { allData, remainingRateLimit };
+};
+
 const handler = async (event) => {
   const { httpMethod, queryStringParameters } = event;
 
@@ -5,14 +68,6 @@ const handler = async (event) => {
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method Not Allowed' }),
-    };
-  }
-
-  const githubApiKey = process.env.GITHUB_API_KEY;
-  if (!githubApiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'GitHub API key is missing' }),
     };
   }
 
@@ -41,26 +96,20 @@ const handler = async (event) => {
     };
   }
 
-  const url = `https://api.github.com/orgs/${organization}/repos?type=${type}`;
+  const url = `https://api.github.com/orgs/${organization}/repos?type=${type}&per_page=100`;
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${githubApiKey}`,
-        Accept: 'application/vnd.github+json',
-      },
-    });
+    const { allData: data, remainingRateLimit } = await fetchAllPages(url);
 
-    if (!response.ok) {
+    if (remainingRateLimit <= 1) {
       return {
-        statusCode: response.status,
+        statusCode: 429,
         body: JSON.stringify({
-          error: `Failed to fetch repositories: ${response.statusText}`,
+          error: 'Rate limit exceeded',
         }),
       };
     }
 
-    const data = await response.json();
     return {
       statusCode: 200,
       body: JSON.stringify(data),

@@ -19,21 +19,38 @@ export default class IndexRoute extends Route {
     }
 
     try {
-      const data = await this.github.fetchNetlify(
+      const { data, error } = await this.github.fetchNetlify(
         params.organization,
         params.type,
       );
+
+      if (error) {
+        const rateLimitExceeded = error.errors.some(
+          (error) => error.status === '429',
+        );
+
+        return {
+          organization: params.organization,
+          type: 'all',
+          data,
+          error: rateLimitExceeded
+            ? 'rate_limit_exceeded'
+            : 'failed_to_fetch_repositories',
+        };
+      }
 
       return {
         organization: params.organization,
         type: params.type || 'all',
         data,
+        error,
       };
     } catch (error) {
       return {
         organization: params.organization,
         type: 'all',
         data: undefined,
+        error,
       };
     }
   }

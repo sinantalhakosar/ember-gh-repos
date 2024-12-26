@@ -6,10 +6,10 @@ export default class GithubService extends Service {
 
   async fetchNetlify(organization, type) {
     try {
-      return await this.store.query('repository', { organization, type });
+      const data = await this.store.query('repository', { organization, type });
+      return { error: null, data };
     } catch (error) {
-      console.error('Error fetching repositories:', error);
-      throw error;
+      return { error, data: null };
     }
   }
 }

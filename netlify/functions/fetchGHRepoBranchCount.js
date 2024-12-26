@@ -50,6 +50,18 @@ const handler = async (event) => {
       };
     }
 
+    const remainingRateLimit = parseInt(
+      response.headers.get('x-ratelimit-remaining'),
+      10,
+    );
+
+    if (remainingRateLimit <= 1) {
+      return {
+        statusCode: 429,
+        body: JSON.stringify({ data: undefined }),
+      };
+    }
+
     const data = await response.json();
     if (data.length === 0) {
       // means repo is empty

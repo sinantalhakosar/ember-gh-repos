@@ -31,7 +31,7 @@ const handler = async (event) => {
     };
   }
 
-  const url = `https://api.github.com/repos/${owner}/${repository}/branches`;
+  const url = `https://api.github.com/repos/${owner}/${repository}/branches?per_page=100`;
 
   try {
     const response = await fetch(url, {

@@ -1,7 +1,7 @@
 <div
   type="button"
   tabindex="0"
-  class="rounded-lg overflow-hidden p-4 border border-gray-700 cursor-pointer transition duration-400 w-full text-left"
+  class="overflow-hidden p-4 border-b border-gray-700 cursor-pointer transition duration-400 w-full text-left mt-2"
   ...attributes
   {{on "click" this.toggle}}
 >
@@ -41,7 +41,10 @@
 
         <div class="flex items-center gap-1 ml-4">
           {{#if this.isBranchCountLoading}}
-            <div class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-6"></div>
+            <div
+              class="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-6"
+            ></div>
+
           {{else}}
             {{svg-jar "split" class="w-4 h-4"}}
             <span class="text-sm">
@@ -66,12 +69,34 @@
     <div class="mt-4 pt-4 border-t border-gray-700">
       {{#if this.isBranchesLoading}}
         Loading...
+
       {{else if (eq this.branches.length 0)}}
         No branches available. Repository might be empty.
+
       {{else}}
-        List of branches:
+        <span class="text-sm">
+          List of branches: ({{this.branches.length}}
+          total)
+        </span>
+
+        {{#if (gt this.branchCount this.branches.length)}}
+          <br />
+          <span class="text-sm">
+            * There are more branches than listed, for all branches visit:
+            <a
+              href="{{@repo_url}}/branches/all"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sky-500 hover:underline"
+            >
+              here
+            </a>
+          </span>
+        {{/if}}
+
         <ul class="list-disc list-inside">
           {{#each this.branches as |branch|}}
+
             <li class="text-sm text-gray-400">
               <a
                 href="{{@repo_url}}/tree/{{branch}}"

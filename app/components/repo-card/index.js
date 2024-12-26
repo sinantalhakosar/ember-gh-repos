@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 
 export default class RepoCardIndex extends Component {
+  @service router;
   @service store;
   @tracked collapse = true;
   @tracked branchCount = null;
@@ -37,7 +38,7 @@ export default class RepoCardIndex extends Component {
         repository: repo_name,
       });
 
-      this.branchCount = repo.branchCount;
+      this.branchCount = repo.branchCount ?? '-';
     } catch (error) {
       console.error('Error fetching branch count:', error);
       this.error = 'Failed to fetch branch count';

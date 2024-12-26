@@ -1,29 +1,61 @@
 {{page-title "EmberGhRepos"}}
 <div class="max-w-screen-lg mx-auto h-screen">
-  {{#if (eq this.model.data null)}}
-    <div class="h-full flex items-center justify-center">
-      <RepoFilter @organization={{this.model.organization}} />
-    </div>
-  {{else if (eq this.model.data undefined)}}
-    <div class="h-full flex items-center justify-center">
-      <h1>Error</h1>
-    </div>
-
-  {{else}}
-    <div class="flex flex-col gap-4 mt-10">
-      <RepoFilter @organization={{this.model.organization}} />
-
-      {{#each this.model.data as |repo|}}
-        <RepoCard
-          @repo_name={{repo.name}}
-          @repo_url={{repo.html_url}}
-          @is_private={{repo.private}}
-          @description={{repo.description}}
-          @language={{repo.language}}
-          @owner={{repo.owner}}
-        />
-      {{/each}}
+  {{#if (eq this.model.error "rate_limit_exceeded")}}
+    <div
+      id="sticky-banner"
+      tabindex="-1"
+      class="fixed top-0 start-0 z-50 flex justify-between w-full p-2 bg-red-500"
+    >
+      <div class="flex items-center mx-auto">
+        <p class="flex items-center text-sm font-normal text-white">
+          <span
+            class="inline-flex p-1 me-3 bg-white rounded-full w-6 h-6 items-center justify-center flex-shrink-0 text-orange-500"
+          >
+            {{svg-jar "traffic-cone" class="w-4 h-4"}}
+          </span>
+          <span>Rate limit exceeded. Please try again later. For more
+            information you can visit
+            <a
+              href="https://docs.github.com/en/rest/rate-limit/rate-limit?apiVersion=2022-11-28"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline font-medium underline text-blue-800 underline-offset-2 decoration-600 decoration-solid hover:no-underline"
+            >Github Docs</a></span>
+        </p>
+      </div>
     </div>
   {{/if}}
 
+  {{#if (eq this.modelData null)}}
+    <div class="h-full flex items-center justify-center">
+      <RepoFilter @organization={{this.model.organization}} @languages="{[]}" />
+    </div>
+  {{else if (eq this.modelData undefined)}}
+    <div class="h-full flex items-center justify-center">
+      <h1>Error</h1>
+    </div>
+  {{else}}
+    <div class="flex flex-col gap-4 pt-10">
+      <RepoFilter
+        @organization={{this.model.organization}}
+        @languages={{this.languages}}
+        @onLanguageChange={{this.handleLanguageChange}}
+      />
+
+      <span class="text-sm">Showing {{this.modelData.length}} repos total</span>
+
+      <div class="h-[calc(100vh-11rem)] overflow-y-auto">
+        {{#each this.modelData as |repo|}}
+          <RepoCard
+            @repo_name={{repo.name}}
+            @repo_url={{repo.html_url}}
+            @is_private={{repo.private}}
+            @description={{repo.description}}
+            @language={{repo.language}}
+            @owner={{repo.owner}}
+          />
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
 </div>

@@ -14,6 +14,11 @@ export default class RepoFilterIndex extends Component {
   }
 
   @action
+  handleTokenChange(event) {
+    document.cookie = `github_token=${event.target.value}; path=/; secure; HttpOnly`;
+  }
+
+  @action
   handleOrganizationChange(event) {
     this.organization = event.target.value;
   }
@@ -51,5 +56,10 @@ export default class RepoFilterIndex extends Component {
       type: this.type,
     };
     this.router.transitionTo({ queryParams });
+  }
+
+  @action
+  handleLanguageChange(event) {
+    this.args.onLanguageChange(event.target.value);
   }
 }
