@@ -17,7 +17,6 @@ export default class RepoFilterIndex extends Component {
 
   @action
   handleTokenChange(event) {
-    document.cookie = `github_token=${event.target.value}; path=/;`;
     this.githubToken = event.target.value;
   }
 
@@ -39,7 +38,19 @@ export default class RepoFilterIndex extends Component {
       organization: this.organization,
     };
 
-    this.args.onSearch(queryParams);
+    const tokenFromCookie =
+      document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('github_token='))
+        ?.split('=')[1] || '';
+
+    // We need hard reload if the token has changed
+    if (tokenFromCookie !== this.githubToken) {
+      document.cookie = `github_token=${this.githubToken}; path=/;`;
+      this.args.onSearch(queryParams, true);
+    } else {
+      this.args.onSearch(queryParams, false);
+    }
   }
 
   @action

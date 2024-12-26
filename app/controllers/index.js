@@ -43,7 +43,16 @@ export default class IndexController extends Controller {
   }
 
   @action
-  handleSearch(queryParams) {
-    this.router.transitionTo({ queryParams });
+  handleSearch(queryParams, hardReload = false) {
+    /*
+      We will be prioritizing the token from the cookies over token in env variables in server.
+    */
+    if (hardReload) {
+      this.router.transitionTo({ queryParams }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      this.router.transitionTo({ queryParams });
+    }
   }
 }
